@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script src="./main.js?v=1" defer></script>
+    <script src="./prototype.js?v=1" defer></script>
+    <script src="./index.js?v=1" defer></script>
+  </head>
+  <body>
+    <div class="input__container">
+      <div class="input__box"><input type="checkbox" class="input" /></div>
+    </div>
+    <div class="circle">
+      <svg class="circle__svg" viewbox="0 0 36 36">
+        <!-- Основной круг viewbox="x y w h" -->
+        <circle cx="18" cy="18" r="16" stroke="#eee" fill="none" stroke-width="4" />
+        <!-- Круг, отражающий прогресс -->
+        <circle
+          class="circle__control"
+          cx="18"
+          cy="18"
+          r="16"
+          stroke="#f06"
+          fill="none"
+          stroke-width="4"
+          stroke-dasharray="100"
+          stroke-dashoffset="-10"
+        />
+        <!-- stroke-dashoffset="-10" управляем через него -->
+      </svg>
+      <span class="circle__text">50%</span>
+    </div>
+    <div class="tabs">
+      <div class="tab">
+        <div class="tab__control" data-tab-id="1">Tabs click text</div>
+        <div class="tab__content" data-tab-id="1">
+          lorem <br />
+          ....<br />
+          ...<br />
+          end
+        </div>
+      </div>
+      <div class="tab">
+        <div class="tab__control" data-tab-id="2">Tabs click text</div>
+        <div class="tab__content" data-tab-id="2">
+          lorem <br />
+          ....<br />
+          ...<br />
+          end
+        </div>
+      </div>
+      <div class="tab">
+        <div class="tab__control" data-tab-id="3">Tabs click text</div>
+        <div class="tab__content" data-tab-id="3">
+          lorem <br />
+          ....<br />
+          ...<br />
+          end
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
