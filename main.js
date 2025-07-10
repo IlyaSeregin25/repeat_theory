@@ -1,5 +1,138 @@
 'use strict';
 
+/* ПРОЧТИ
+Если мы перебираем объект или изменяем и выводим через console.log() его данные,
+то в браузере мы можем увидеть такую вещь
+    [{…}] Однако при раскрытии будет Length 0 как буд то бы массив пустой.
+При этом, этот же код в другом компиляторе отобразит нам фактические данные.
+Это особенность отображения информации в браузере.
+Консоль сохраняет ссылку на объект, а не его точное состояние на момент записи. 
+Таким образом, когда вы позднее раскроете объект, браузер покажет его текущую версию, 
+независимо от того, какой была версия объекта на момент первоначального вызова console.log().
+Для корректного отображения нужно делать копию объекта (JSON.parse(JSON.stringify(arr)))
+    console.log(stack);         [{…}] Пустой массив
+    console.log([...stack]);    [{…}] Массив с данными которые можно посмотреть.
+Либо используем дебагер и смотрим там. Так же при дебагере в консоли тоже будет
+актуальная информация (нужно прыгать по стрелке)
+Открываем Sources выделяем строку где console.log(stack). Перезагружаем страницу.
+Теперь в дебагере можем навестись и посмотреть данные. Сверху всередине есть значки
+плэй - скачет от дебагера к дебагеру, и стрелочка по часовой стрелке, 
+которая выполняет следующую строчку кода. Жмем ее, переходим во вкладку консоли, там реальный объект.
+Вертикальные стрелочки - войти/выйти в функцию
+В Watch мы можем добавить переменную stack и посмотреть как меняется содержимое в моменте.
+В дебагере можем щелкнуть правой кнопкой мыши, выбрать Edit и там прописать например count === 10.
+Теперь дебагер будет останавливаться на этой строчке только если будет соблюдаться это условие.
+*/
+
+(function () {
+  /* Перебор объекта циклом и рекурсией */
+  //['users.age', 'user.info.email', ...]
+  const data = {
+    user: {
+      name: 'Alice',
+      age: null,
+      info: {
+        email: null,
+        city: 'Paris',
+      },
+    },
+    settings: {
+      theme: null,
+    },
+    debug: null,
+  };
+
+  const findNullPaths = obj => {
+    let result = [];
+    let stack = [{ data: obj, path: [] }];
+
+    while (stack.length > 0) {
+      const { data, path } = stack.pop();
+
+      if (data === null) result.push(path);
+
+      for (let key in data) {
+        if (typeof data[key] === 'object') {
+          stack.push({ data: data[key], path: [...path, key] });
+        }
+      }
+    }
+    return result;
+
+    /* Рекурсия
+    function recursia(obj, trail) {
+      if (typeof obj !== 'object') return;
+      for (let key in obj) {
+        let path = trail ? trail : '';
+        path += '.' + key;
+        if (obj[key] === null) result.push(path);
+        if (typeof obj[key] === 'object') recursia(obj[key], path);
+      }
+    }
+    recursia(obj);
+     */
+  };
+
+  //Сгруппировать по возросту и посчитайть среднее значение.
+  const users = [
+    { name: 'al1', age: 25, scope: 70 },
+    { name: 'al2', age: 25, scope: 71 },
+    { name: 'al3', age: 35, scope: 80 },
+    { name: 'al4', age: 35, scope: 80 },
+    { name: 'al5', age: 25, scope: 75 },
+  ];
+  //[{25: {users: ['al1', 'al2', 'al5'], avgScope: 72}}, {35: {users: ['al3', 'al4'], avgScope: 80}}]
+
+  function groupByAge(arrs) {
+    let ageUnick = new Set();
+    let res = {};
+    arrs.forEach(elem => {
+      if (ageUnick.has(elem.age)) {
+        const { users, avgScope } = res[elem.age];
+        users.push(elem.name);
+        res[elem.age].avgScope = (avgScope * (users.length - 1) + elem.scope) / users.length;
+      } else {
+        res[elem.age] = { users: [elem.name], avgScope: elem.scope };
+        ageUnick.add(elem.age);
+      }
+    });
+    return res;
+  }
+
+  //ul li Titl1 ul ul li ul
+  const data2 = [
+    {
+      name: 'Titl1',
+      children: [
+        { name: 'apple' },
+        { name: 'banana' },
+        { name: 'Titl11', children: [{ name: 'a1' }, { name: 'ap2' }] },
+      ],
+    },
+    {
+      name: 'Titl2',
+      children: [{ name: 'apple2' }],
+    },
+  ];
+  function createLists(arrs) {
+    const apple = document.querySelector('.apple');
+    const stack = [{ data: arrs, parent: apple }];
+    while (stack.length > 0) {
+      let { data, parent } = stack.pop();
+      let list = document.createElement('ul');
+      data?.forEach(elem => {
+        const li = document.createElement('li');
+        li.innerHTML = elem.name;
+        if (elem.children) {
+          stack.push({ data: elem.children, parent: li });
+        }
+        list.appendChild(li);
+      });
+      parent.appendChild(list);
+    }
+  }
+})();
+
 (function () {
   //graph1: A - F
   //Создание очереди - цикл - вытаскивание из очереди, проверка, выход, наполнение очереди
@@ -431,6 +564,10 @@ let arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 (function () {
   //JSON.stringifi() - функции и undefined пропадают. NaN превращается в null. Не копирует дом элементы. Пропадает связь с instanceof.
   const arrs = [
+    null,
+    undefined,
+    NaN,
+    () => {},
     1,
     [2],
     { age: 11, names: ['alex', 'petay'] },
@@ -518,8 +655,9 @@ shift + alt + F     - автовыравнивание
 shift + alt + A     - многострочный коммент со звездочками
 */
 
-/* HTML CSS z-index opacity / visibility / display. Инпут в Лейбл
+/* HTML CSS z-index "opacity / visibility / display". Инпут в Лейбл
 ----------------------------------HTML CSS------------------------------------------
+Cascading Style Sheets -- HyperText Markup Language
 display: none;       - Удаляет элемент из верстки. Гугл поиск не увидит нашу пустую страницу. Не анимируется.
 visibility/opacity   - Элемент остается в верстке, гугл видит нашу страницу.
 visibility: hidden;  - Скрывает информацию для скринридеров. Табуляция и клики не работает. Не анимируется.
@@ -580,15 +718,21 @@ justify - по основной оси, align - по поперечной оси
 
 /* Строгое / не строгое сравнение
     == НЕ СТРОГОЕ СРАВНЕНИЕ
+    ПРИВИДЕНИЕ типов: Запомни [].toString() = ''
+        числа и строки приводят к числу.
+        []  - [].toString(). Поэтому (0 == [], 0 == '', 0 == 0)
+                                     ('0' != [], '0' != '')
+        {}  - {}.valueOf(). Если вернет примитивы, то используются они, если нет, то  {}.valueOf().toString()
     1) Object если ссылка совпадает
     2) Numbers, String, Boolean, BigInt по значению.
     3) Symbol уникальные
     4) При сравнении Примитивные и Объектов правила приведения к примитивам
-        Null == Undefined != 0/false
+        Null == Undefined != 0/false/'0'
         '' == false == [] == 0 != {}    
         [1,2] == '1,2' != '12'          //массивы выводятся как строки через запятую
         0 == -0
         NaN == NaN нет. NaN ничему не равен в т.ч. самому себе
+
     5) Регистр важен!
         'A' != 'a'
         'A' !== 'a'
@@ -623,7 +767,7 @@ justify - по основной оси, align - по поперечной оси
     a ||=b    a || (a = b)          Если a = false, то a = b;
     let a, b = 123; Вернет a = 123,     let a, b = null; a ||=b вернет a = null.
 3) &&  (И)
-    Если все операнды были истинными, возвращается последний. Если все истинные - то первый.
+    Возвращает первое ложное значение среди операндов или последний операнд, если все значения истинны.
     (true && 12 && '-sd'):-sd
 4) &&= (Оператор логического присваивания И)
     a &&= b    a && (a = b)     Если и а и b истинны, то a = b.
@@ -632,7 +776,7 @@ justify - по основной оси, align - по поперечной оси
 7) ??= (Оператор нулевого присваивания)
 ПРИОРИТЕТНОСТЬ выполнения: сначало !, потом &&, потом ||, потом
 
-console.log(false || false)
+console.log(false || null)
 console.log(-2 || -1)
 console.log(0 || 2 || 1)
 console.log(undefined || null || false || -1)
